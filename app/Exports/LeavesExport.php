@@ -19,7 +19,7 @@ class LeavesExport implements WithMultipleSheets
     {
         return [
             new LeavesMainSheet($this->leaves, $this->periodStart, $this->periodEnd),
-            new LeavesAnnualSheet($this->leaves, $this->periodStart->format('Y')),
+            new LeavesAnnualSheet($this->leaves, $this->periodStart, $this->periodEnd),
         ];
     }
 }

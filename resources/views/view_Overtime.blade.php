@@ -100,7 +100,7 @@
                 <tr>
                     <th scope="col" class="px-2 py-2 font-medium">N</th>
                     <th scope="col" class="px-2 py-2 font-medium">Employee Name</th>
-                    <th scope="col" class="px-2 py-2 font-medium">Total Hours</th>
+                    <!-- <th scope="col" class="px-2 py-2 font-medium">Total Hours</th> -->
                     <th scope="col" class="px-2 py-2 font-medium">Reason</th>
                     <th scope="col" class="px-2 py-2 font-medium">Date</th>
                     <th scope="col" class="px-2 py-2 font-medium">Day</th>
@@ -125,7 +125,7 @@
                         <th scope="row" class="px-2 py-2 font-medium text-heading">
                             {{ $item->name }}
                         </th>
-                        <td class="px-2 py-2">{{ $item->total_hours }}</td>
+                        <!-- <td class="px-2 py-2">{{ $item->total_hours }}</td> -->
                         <td class="px-2 py-2">{{ $item->reason }}</td>
                         <td class="px-2 py-2">{{ \Carbon\Carbon::parse($item->date)->format('d M Y') }}</td>
                         <td class="px-2 py-2">{{ $item->day }}</td>

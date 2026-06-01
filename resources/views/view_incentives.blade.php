@@ -83,40 +83,28 @@
                     <th class="px-4 py-3 font-medium">N</th>
                     <th class="px-4 py-3 font-medium">اسم الموظف</th>
                     <th class="px-4 py-3 font-medium">التقييم / الحافز</th>
-                    <th class="px-4 py-3 font-medium">التاريخ</th>
-                    <th class="px-4 py-3 font-medium">تاريخ الإضافة</th>
-                    @if(Auth::user()->role === 'super_admin')
-                        <th class="px-4 py-3 font-medium">IP Address</th>
-                    @endif
+                    <th class="px-4 py-3 font-medium">ملاحظة</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($incentives as $index => $item)
+                @foreach($users as $index => $user)
                 <tr class="odd:bg-neutral-primary even:bg-neutral-secondary-soft border-b border-default">
                     <td class="px-4 py-3">{{ $index + 1 }}</td>
-                    <td class="px-4 py-3 font-medium text-heading">{{ $item->name }}</td>
-                    <td class="px-4 py-3">{{ $item->evaluation }}</td>
-                    <td class="px-4 py-3">{{ \Carbon\Carbon::parse($item->date)->format('d M Y') }}</td>
+                    <td class="px-4 py-3 font-medium text-heading">{{ $user->name }}</td>
                     <td class="px-4 py-3">
-                        {{ $item->created_at->format('d M Y') }}
-                        <br><span class="text-xs text-gray-500">{{ $item->created_at->format('H:i:s') }}</span>
+                        @php
+                            $userIncentive = $incentives->where('user_id', $user->id)->first();
+                        @endphp
+                        {{ $userIncentive ? $userIncentive->evaluation : '' }}
                     </td>
-                    @if(Auth::user()->role === 'super_admin')
-                        <td class="px-4 py-3 text-xs text-gray-500" dir="ltr" style="text-align: left;">{{ $item->created_ip ?? '-' }}</td>
-                    @endif
+                    <td class="px-4 py-3"></td>
                 </tr>
-                @empty
-                <tr>
-                <td colspan="6" class="px-4 py-10 text-center text-body">
-                        لا توجد حوافز في هذه الدورة.
-                    </td>
-                </tr>
-                @endforelse
+                @endforeach
             </tbody>
         </table>
     </div>
 
-    @if(Auth::user()->role === 'super_admin' && $incentives->count() > 0)
+    @if(Auth::user()->role === 'super_admin')
     <div class="flex justify-end mt-4 mb-8">
         <a href="{{ route('incentives.export', ['period_start' => $selectedPeriodStart]) }}"
            class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg">

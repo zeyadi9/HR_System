@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -23,21 +24,21 @@ class IncentiveExport implements FromCollection, WithHeadings, WithTitle, WithSt
 
     public function collection()
     {
-        return $this->incentives->map(function ($item, $index) {
+        $users = User::orderBy('name')->get();
+        return $users->map(function ($user, $index) {
+            $userIncentive = $this->incentives->where('user_id', $user->id)->first();
             return [
                 'N'              => $index + 1,
-                'Employee Name'  => $item->name,
-                'Job Title'      => $item->user->job_title ?? '—',
-                'Evaluation'     => $item->evaluation,
-                'Date'           => \Carbon\Carbon::parse($item->date)->format('d M Y'),
-                'Created At'     => $item->created_at->format('d M Y H:i'),
+                'اسم الموظف'     => $user->name,
+                'التقييم'        => $userIncentive ? $userIncentive->evaluation : '',
+                'ملاحظة'         => '',
             ];
         });
     }
 
     public function headings(): array
     {
-        return ['N', 'Employee Name', 'Job Title', 'Evaluation', 'Date', 'Created At'];
+        return ['N', 'اسم الموظف', 'التقييم', 'ملاحظة'];
     }
 
     public function title(): string

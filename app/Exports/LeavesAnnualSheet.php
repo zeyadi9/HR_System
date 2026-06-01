@@ -9,12 +9,14 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class LeavesAnnualSheet implements FromCollection, WithHeadings, WithTitle, WithStyles
 {
     protected $leaves;
-    protected $year;
+    protected $periodStart;
+    protected $periodEnd;
 
-    public function __construct($leaves, $year)
+    public function __construct($leaves, $periodStart, $periodEnd)
     {
         $this->leaves = $leaves;
-        $this->year = $year;
+        $this->periodStart = $periodStart;
+        $this->periodEnd = $periodEnd;
     }
 
     public function collection()
@@ -26,18 +28,18 @@ class LeavesAnnualSheet implements FromCollection, WithHeadings, WithTitle, With
         return collect($annualTotals)->map(function ($record) {
             return [
                 'Employee Name' => $record['name'],
-                'Total Days'    => $record['total'] . ' days',
-                'Year'          => $this->year,
+                'Total Days In Period' => $record['total'] . ' days',
+                'Period'        => $this->periodStart->format('d M Y') . ' - ' . $this->periodEnd->format('d M Y'),
             ];
         });
     }
 
     public function headings(): array
     {
-        return ['Employee Name', 'Total Days This Year', 'Year'];
+        return ['Employee Name', 'Total Days In Period', 'Period'];
     }
 
-    public function title(): string { return 'إجمالي الإجازات السنوي'; }
+    public function title(): string { return 'الملخص خلال الدورة'; }
 
     public function styles(Worksheet $sheet)
     {
