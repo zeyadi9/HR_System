@@ -18,5 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, $request) {
+            return redirect()->back()
+                ->withInput($request->except('_token'))
+                ->withErrors(['error' => 'انتهت صلاحية الجلسة (Session Expired). يرجى المحاولة مرة أخرى، أو تحديث الصفحة.']);
+        });
     })->create();

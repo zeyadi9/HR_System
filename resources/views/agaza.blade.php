@@ -90,10 +90,13 @@
         <input type="text" name="substitute" id="substitute" class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs" required />
     </div>
 
+    {{--
     <div class="mb-3" hidden>
         <label for="days_count" class="block mb-2.5 text-sm font-medium text-heading">الايام</label>
-        <input type="number" name="days_count" id="days_count" min="1" value="1" class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs" required />
+        <input type="number" name="days_count" id="days_count_visible" min="1" value="1" class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs" required />
     </div>
+    --}}
+    <input type="hidden" name="days_count" id="days_count" value="1" required />
 
 <button type="submit" class="text-white bg-gradient-to-l from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 focus:ring-4 focus:ring-blue-300 font-semibold rounded-xl text-sm px-5 py-2.5 shadow-md transition-all duration-200 border border-black">
     Submit

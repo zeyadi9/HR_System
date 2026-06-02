@@ -599,11 +599,12 @@
                                 <p class="error-msg">{{ $message }}</p>
                             @enderror
                         </div>
+                        {{--
                         <div class="form-group">
                             <label class="form-label" for="leave_days">
                                 <span class="required">*</span> عدد الأيام
                             </label>
-                            <input type="number" name="days_count" id="leave_days"
+                            <input type="number" name="days_count" id="leave_days_visible"
                                 class="form-control {{ $errors->has('days_count') ? 'is-invalid' : '' }}"
                                 min="1" placeholder="1"
                                 value="{{ old('days_count', 1) }}"
@@ -612,6 +613,8 @@
                                 <p class="error-msg">{{ $message }}</p>
                             @enderror
                         </div>
+                        --}}
+                        <input type="hidden" name="days_count" id="leave_days" value="1" disabled>
                     </div>
                 </div>
 
