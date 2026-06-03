@@ -11,6 +11,11 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
         
+        // مسح الإشعارات غير المقروءة عند زيارة الصفحة
+        if ($user->unreadNotifications->count() > 0) {
+            $user->unreadNotifications->markAsRead();
+        }
+        
         // جلب الإشعارات مرتبة من الأحدث للأقدم مع Pagination
         $notifications = $user->notifications()->paginate(15);
         

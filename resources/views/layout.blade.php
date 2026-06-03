@@ -255,6 +255,57 @@
             transform: translateY(-6px) rotate(-45deg);
         }
 
+        .mobile-nav-right {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .mobile-notification-btn {
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            transition: 0.3s;
+        }
+
+        .mobile-notification-btn:active {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: bold;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 2px solid #0f172a;
+        }
+
+        .desktop-badge {
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 0.1rem 0.4rem;
+            border-radius: 12px;
+            margin-right: 0.3rem;
+        }
+
         .mobile-menu {
             display: none;
             flex-direction: column;
@@ -307,6 +358,7 @@
         @media (max-width: 1024px) {
             .nav-links { display: none; }
             .hamburger { display: flex; }
+            .mobile-nav-right { display: flex; }
             .mobile-current-page {
                 display: flex;
                 align-items: center;
@@ -582,6 +634,8 @@
         request()->routeIs('notifications.index') => 'الإشعارات',
         default => 'الرئيسية',
     };
+
+    $unreadCount = Auth::check() ? Auth::user()->unreadNotifications->count() : 0;
 @endphp
 
 <nav class="main-nav">
@@ -604,7 +658,12 @@
             <div class="nav-item"><a href="{{ route('Overtime') }}" class="nav-link {{ request()->routeIs('Overtime') ? 'active' : '' }}">⏱️ اضافي</a></div>
             <div class="nav-item"><a href="{{ route('check_in_out') }}" class="nav-link {{ request()->routeIs('check_in_out') ? 'active' : '' }}">⏳ حضور وانصراف</a></div>
             <div class="nav-item"><a href="{{ route('settlements.create') }}" class="nav-link {{ request()->routeIs('settlements.create') ? 'active' : '' }}">⚙️ تسوية</a></div>
-            <div class="nav-item"><a href="{{ route('notifications.index') }}" class="nav-link {{ request()->routeIs('notifications.index') ? 'active' : '' }}">🔔 الإشعارات</a></div>
+            <div class="nav-item"><a href="{{ route('notifications.index') }}" class="nav-link {{ request()->routeIs('notifications.index') ? 'active' : '' }}">
+                🔔 الإشعارات
+                @if($unreadCount > 0)
+                    <span class="desktop-badge">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+                @endif
+            </a></div>
 
             <div class="nav-separator"></div>
 
@@ -674,9 +733,19 @@
         </div>
         @endauth
         
-        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu" type="button">
-            <span></span><span></span><span></span>
-        </button>
+        <div class="mobile-nav-right">
+            @auth
+            <a href="{{ route('notifications.index') }}" class="mobile-notification-btn" aria-label="Notifications" style="position: relative;">
+                🔔
+                @if($unreadCount > 0)
+                    <span class="notification-badge">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+                @endif
+            </a>
+            @endauth
+            <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu" type="button">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
     </div>
     
     <div class="mobile-menu" id="mobileMenu">
@@ -688,7 +757,12 @@
             <a href="{{ route('Overtime') }}" class="{{ request()->routeIs('Overtime') ? 'active' : '' }}">⏱️ اضافي</a>
             <a href="{{ route('check_in_out') }}" class="{{ request()->routeIs('check_in_out') ? 'active' : '' }}">⏳ حضور وانصراف</a>
             <a href="{{ route('settlements.create') }}" class="{{ request()->routeIs('settlements.create') ? 'active' : '' }}">⚙️ طلب تسوية</a>
-            <a href="{{ route('notifications.index') }}" class="{{ request()->routeIs('notifications.index') ? 'active' : '' }}">🔔 الإشعارات</a>
+            <a href="{{ route('notifications.index') }}" class="{{ request()->routeIs('notifications.index') ? 'active' : '' }}">
+                🔔 الإشعارات
+                @if($unreadCount > 0)
+                    <span class="desktop-badge" style="margin-right: auto; margin-left: 0;">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+                @endif
+            </a>
             <div class="mobile-separator"></div>
             <a href="{{ route('view_Overtime') }}" class="{{ request()->routeIs('view_Overtime') ? 'active' : '' }}">📊 عرض الاضافي</a>
             <a href="{{ route('view_leave') }}" class="{{ request()->routeIs('view_leave') ? 'active' : '' }}">📅 عرض الاجازات</a>
