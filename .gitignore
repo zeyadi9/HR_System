@@ -22,3 +22,22 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Database Backups & Local Sql Dumps
+/DB BK/
+*.sql
+
+# Composer & Temporary Scripts
+composer.phar
+diag_attendance.php
+scratch_test.php
+check_indexes.php
+
+# Mobile App Build & Tools
+tk_mobile/.dart_tool/
+tk_mobile/.idea/
+tk_mobile/build/
+tk_mobile/build_log.txt
+tk_mobile/.flutter-plugins
+tk_mobile/.flutter-plugins-dependencies
+

@@ -262,6 +262,33 @@ public function view_permission(Request $request)
 
         SubmissionWindow::assertDateWithinAllowedWindow($request->date, 'Permission date');
 
+        // Check if the permission exceeds 3 hours limit per month (180 minutes)
+        $requestedMinutes = 0;
+        if ($request->filled('from') && $request->filled('to')) {
+            $fromTime = \Carbon\Carbon::parse($request->from);
+            $toTime   = \Carbon\Carbon::parse($request->to);
+            $requestedMinutes = $fromTime->diffInMinutes($toTime);
+        }
+
+        $period = \App\Support\PayrollPeriod::fromRequest($request->date);
+        $permissions = Permission::where('user_id', Auth::id())
+            ->whereBetween('date', [$period['start']->toDateString(), $period['end']->toDateString()])
+            ->where('status', '!=', 'refused')
+            ->get();
+        
+        $totalMinutes = 0;
+        foreach ($permissions as $p) {
+            if ($p->from && $p->to) {
+                $p_from = \Carbon\Carbon::parse($p->from);
+                $p_to   = \Carbon\Carbon::parse($p->to);
+                $totalMinutes += $p_from->diffInMinutes($p_to);
+            }
+        }
+
+        if (($totalMinutes + $requestedMinutes) > 180) {
+            return redirect()->back()->with('alert_error', "⚠️ عذراً، لا يمكنك إضافة هذا الإذن لأنك ستتخطى الحد الأقصى المسموح به للأذونات وهو 3 ساعات شهرياً.")->withInput();
+        }
+
         $name = (Auth::user()->email === 'guest@gamma.com' && $request->has('name')) 
             ? $request->name 
             : Auth::user()->name;

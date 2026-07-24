@@ -16,7 +16,7 @@ class PenaltyController extends Controller
     public function index()
     {
         if (!in_array(Auth::user()->role, ['admin', 'super_admin'])) abort(403);
-        $users = User::where('role', 'user')->get();
+        $users = User::orderBy('name')->get();
         return view('admin_penalty', compact('users'));
     }
 
