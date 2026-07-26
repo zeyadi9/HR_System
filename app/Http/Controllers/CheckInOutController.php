@@ -107,11 +107,7 @@ class CheckInOutController extends Controller
             $summaryQuery->where('user_id', Auth::id());
         }
 
-        $cycleSummary = $summaryQuery
-            ->selectRaw("name, SUM(CASE WHEN type = 'حضور' THEN 1 ELSE 0 END) as check_in_count, SUM(CASE WHEN type = 'انصراف' THEN 1 ELSE 0 END) as check_out_count, COUNT(*) as total")
-            ->groupBy('name')
-            ->orderByDesc('total')
-            ->get();
+        $cycleSummary = self::computeCycleSummary($summaryQuery->get());
 
         $olderPendingCount = in_array(Auth::user()->role, ['admin', 'super_admin'])
             ? CheckInOut::where('status', 'pending')
@@ -177,6 +173,60 @@ class CheckInOutController extends Controller
         return redirect()->route('view_check_in_out')->with('success', 'تم رفض الحركة.');
     }
 
+    public static function computeCycleSummary($records)
+    {
+        return $records->where('status', 'accepted')->groupBy('name')->map(function($userRecords, $name) {
+            $checkInCount = $userRecords->where('type', 'حضور')->count();
+            $checkOutCount = $userRecords->where('type', 'انصراف')->count();
+            $totalRecords = $userRecords->count();
+            
+            $byDate = $userRecords->groupBy('date');
+            
+            $totalShifts = $byDate->count();
+            $regularShifts = 0;
+            $fridayShifts = 0;
+            $fridayActualHours = 0;
+            $fridayBonusHours = 0;
+            
+            foreach ($byDate as $dateStr => $dayRecords) {
+                $dateObj = \Carbon\Carbon::parse($dateStr);
+                $dayName = $dayRecords->first()->day ?? '';
+                $isFriday = ($dateObj->dayOfWeek === \Carbon\Carbon::FRIDAY) || (mb_strpos($dayName, 'جمعة') !== false);
+                
+                if ($isFriday) {
+                    $fridayShifts++;
+                    
+                    $checkInRecord = $dayRecords->where('type', 'حضور')->sortBy('created_at')->first();
+                    $checkOutRecord = $dayRecords->where('type', 'انصراف')->sortByDesc('created_at')->first();
+                    
+                    if ($checkInRecord && $checkOutRecord) {
+                        $inTime = \Carbon\Carbon::parse($checkInRecord->created_at);
+                        $outTime = \Carbon\Carbon::parse($checkOutRecord->created_at);
+                        if ($outTime->gt($inTime)) {
+                            $hours = abs($inTime->diffInMinutes($outTime)) / 60;
+                            $fridayActualHours += $hours;
+                            $fridayBonusHours += ($hours * 1.5);
+                        }
+                    }
+                } else {
+                    $regularShifts++;
+                }
+            }
+            
+            return (object) [
+                'name'                => $name,
+                'check_in_count'      => $checkInCount,
+                'check_out_count'     => $checkOutCount,
+                'shifts_count'        => $totalShifts,
+                'regular_shifts'      => $regularShifts,
+                'friday_shifts'       => $fridayShifts,
+                'friday_actual_hours' => round($fridayActualHours, 2),
+                'friday_bonus_hours'  => round($fridayBonusHours, 2),
+                'total'               => $totalRecords,
+            ];
+        })->sortByDesc('shifts_count')->values();
+    }
+
     public function export(Request $request)
     {
         if (Auth::user()->role !== 'super_admin') abort(403);
@@ -193,15 +243,14 @@ class CheckInOutController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        $summary = CheckInOut::whereBetween('date', [
+        $acceptedRecords = CheckInOut::whereBetween('date', [
                 $periodStart->toDateString(),
                 $periodEnd->toDateString(),
             ])
             ->where('status', 'accepted')
-            ->selectRaw("name, SUM(CASE WHEN type = 'حضور' THEN 1 ELSE 0 END) as check_in_count, SUM(CASE WHEN type = 'انصراف' THEN 1 ELSE 0 END) as check_out_count, COUNT(*) as total")
-            ->groupBy('name')
-            ->orderByDesc('total')
             ->get();
+
+        $summary = self::computeCycleSummary($acceptedRecords);
 
         $filename = 'check_in_out_' . $periodStart->format('Y_m_d') . '_to_' . $periodEnd->format('Y_m_d') . '.xlsx';
 

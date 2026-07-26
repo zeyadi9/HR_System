@@ -81,6 +81,9 @@
                                         {{ number_format($user->hourly_rate, 2) }} ج.م
                                     </td>
                                     <td class="px-4 py-3 text-center">
+                                        <a href="{{ route('employee_profiles.show', $user->id) }}" class="btn btn-sm btn-outline-info px-3 me-1" style="border-radius: 8px;">
+                                            👁️ عرض
+                                        </a>
                                         <a href="{{ route('employee_profiles.edit', $user->id) }}" class="btn btn-sm btn-outline-primary px-3" style="border-radius: 8px;">
                                             ✏️ تعديل
                                         </a>

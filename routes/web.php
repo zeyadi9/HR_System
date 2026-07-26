@@ -172,6 +172,7 @@ Route::middleware(['auth', 'super_admin'])->group(function () {
     Route::get('/settlements/export', [SettlementController::class, 'export'])->name('settlements.export');
     // بروفايل الموظفين
     Route::get('/employee-profiles', [EmployeeProfileController::class, 'index'])->name('employee_profiles.index');
+    Route::get('/employee-profiles/{id}', [EmployeeProfileController::class, 'show'])->name('employee_profiles.show');
     Route::get('/employee-profiles/{id}/edit', [EmployeeProfileController::class, 'edit'])->name('employee_profiles.edit');
     Route::post('/employee-profiles/{id}/update', [EmployeeProfileController::class, 'update'])->name('employee_profiles.update');
 });

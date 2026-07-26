@@ -75,15 +75,10 @@ class ReportController extends Controller
         $checkInOut = CheckInOut::with('user')->whereBetween('date', [$startStr, $endStr])
             ->orderByDesc('date')->orderByDesc('created_at')->get();
         
-        $checkInOutSummary = CheckInOut::whereBetween('date', [$startStr, $endStr])
-            ->selectRaw("name, 
-                SUM(CASE WHEN type = 'حضور' AND status = 'accepted' THEN 1 ELSE 0 END) as check_in_count, 
-                SUM(CASE WHEN type = 'انصراف' AND status = 'accepted' THEN 1 ELSE 0 END) as check_out_count, 
-                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_count,
-                COUNT(*) as total")
-            ->groupBy('name')
-            ->orderByDesc('total')
+        $checkInOutAccepted = CheckInOut::whereBetween('date', [$startStr, $endStr])
+            ->where('status', 'accepted')
             ->get();
+        $checkInOutSummary = CheckInOutController::computeCycleSummary($checkInOutAccepted);
 
         // 6. Admin Notes
         $adminNotes = AdminNote::whereBetween('date', [$startStr, $endStr])

@@ -129,7 +129,15 @@
                             @endif
                         </td>
                         <td class="px-2 py-2">{{ \Carbon\Carbon::parse($item->date)->format('d M Y') }}</td>
-                        <td class="px-2 py-2">{{ $item->day }}</td>
+                        <td class="px-2 py-2">
+                            @if(\Carbon\Carbon::parse($item->date)->isFriday() || str_contains($item->day, 'جمعة'))
+                                <span class="bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                                    🕌 {{ $item->day }} (جمعة)
+                                </span>
+                            @else
+                                {{ $item->day }}
+                            @endif
+                        </td>
                         <td class="px-2 py-2">
                             @if($item->status === 'accepted')
                                 <span class="bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full">تم القبول</span>
@@ -228,8 +236,9 @@
                             {{ $periodStart->format('d M Y') }} → {{ $periodEnd->format('d M Y') }}
                         </span>
                     </td>
-                    <td class="px-2 py-2 text-heading">
-                        {{ $records->count() }} سجل
+                    <td class="px-2 py-2 text-heading" colspan="2">
+                        <span class="text-blue-700 font-bold me-2">{{ $records->pluck('date')->unique()->count() }} شيفت</span>
+                        <span class="text-gray-500 font-normal">({{ $records->count() }} حركات مسجلة)</span>
                     </td>
                     <td colspan="15"></td>
                 </tr>
@@ -241,7 +250,7 @@
         <div class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default mt-6 mb-8">
             <div class="px-2 py-2 bg-neutral-secondary-soft border-b border-default flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <h6 class="font-semibold text-heading">
-                    ملخص الحضور والانصراف لكل موظف
+                    ملخص الحضور والانصراف (الشيفتات العادية وشيفتات الجمعة) لكل موظف
                     <span class="text-xs font-normal text-body ms-2">
                         {{ $periodStart->format('d M Y') }} → {{ $periodEnd->format('d M Y') }}
                     </span>
@@ -251,9 +260,11 @@
                 <thead class="bg-neutral-secondary-soft border-b border-default">
                     <tr>
                         <th class="px-2 py-2 font-medium">اسم الموظف</th>
-                        <th class="px-2 py-2 font-medium">عدد مرات الحضور (مقبول)</th>
-                        <th class="px-2 py-2 font-medium">عدد مرات الانصراف (مقبول)</th>
-                        <th class="px-2 py-2 font-medium">الإجمالي</th>
+                        <th class="px-2 py-2 font-medium">شيفتات عادية</th>
+                        <th class="px-2 py-2 font-medium">شيفتات الجمعة</th>
+                        <th class="px-2 py-2 font-medium">ساعات الجمعة (× 1.5)</th>
+                        <th class="px-2 py-2 font-medium">إجمالي الشيفتات</th>
+                        <th class="px-2 py-2 font-medium">إجمالي الحركات</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -261,24 +272,42 @@
                         <tr class="odd:bg-neutral-primary even:bg-neutral-secondary-soft border-b border-default">
                             <td class="px-2 py-2 font-medium text-heading">{{ $record->name ?? 'غير محدد' }}</td>
                             <td class="px-2 py-2">
-                                <span class="bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full">
-                                    {{ $record->check_in_count }} مرة
+                                <span class="bg-gray-100 text-gray-700 text-xs font-medium px-2.5 py-1 rounded-full">
+                                    {{ $record->regular_shifts }} شيفت عادي
                                 </span>
                             </td>
                             <td class="px-2 py-2">
-                                <span class="bg-purple-100 text-purple-700 text-xs font-medium px-2.5 py-1 rounded-full">
-                                    {{ $record->check_out_count }} مرة
+                                @if(($record->friday_shifts ?? 0) > 0)
+                                    <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-300">
+                                        🕌 {{ $record->friday_shifts }} جمعة
+                                    </span>
+                                @else
+                                    <span class="text-gray-400 text-xs">0</span>
+                                @endif
+                            </td>
+                            <td class="px-2 py-2">
+                                @if(($record->friday_bonus_hours ?? 0) > 0)
+                                    <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2.5 py-1 rounded-full border border-purple-200">
+                                        ⏱️ {{ number_format($record->friday_bonus_hours, 2) }} ساعة
+                                    </span>
+                                @else
+                                    <span class="text-gray-400 text-xs">0</span>
+                                @endif
+                            </td>
+                            <td class="px-2 py-2">
+                                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full border border-blue-200">
+                                    ⚡ {{ $record->shifts_count }} شيفت
                                 </span>
                             </td>
                             <td class="px-2 py-2">
-                                <span class="bg-blue-100 text-blue-700 text-xs font-medium px-2.5 py-1 rounded-full">
+                                <span class="bg-gray-100 text-gray-700 text-xs font-medium px-2.5 py-1 rounded-full">
                                     {{ $record->total }} سجل
                                 </span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-6 text-center text-body">لا يوجد سجلات مقبولة في هذه الدورة.</td>
+                            <td colspan="6" class="px-6 py-6 text-center text-body">لا يوجد سجلات مقبولة في هذه الدورة.</td>
                         </tr>
                     @endforelse
                 </tbody>

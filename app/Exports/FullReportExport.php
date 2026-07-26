@@ -56,14 +56,11 @@ class FullReportExport implements WithMultipleSheets
             new LeavesMainSheet($this->leaves, $this->periodStart, $this->periodEnd),
             new LeavesSummarySheet($this->periodStart, $this->periodEnd),
             new PermissionsMainSheet($this->permissions, $this->periodStart, $this->periodEnd),
-            new PermissionsMonthlySheet($this->permissionTotals, $this->periodStart, $this->periodEnd),
             new PenaltyMainSheet($this->penalties, $this->periodStart, $this->periodEnd),
-            new PenaltyMonthlySheet($this->penaltyTotals, $this->periodStart, $this->periodEnd),
             new CheckInOutMainSheet($this->checkInOut, $this->periodStart, $this->periodEnd),
             new CheckInOutSummarySheet($this->checkInOutSummary, $this->periodStart, $this->periodEnd),
             new AdminNoteExport($this->adminNotes, $this->periodStart, $this->periodEnd),
             new IncentiveExport($this->incentives, $this->periodStart, $this->periodEnd),
-            new SettlementExport($this->settlements, $this->periodStart, $this->periodEnd),
         ];
     }
 }
